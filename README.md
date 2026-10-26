@@ -21,4 +21,4 @@ funktioniert alles auch nur mit API-Key.
 
 ## Build
 
-Xcode-Projekt öffnen, Scheme `MyApp` auf „My Mac“ ausführen.
+`redmine-macos-timeclock.xcodeproj` öffnen, Scheme `redmine-macos-timeclock` auf „My Mac“ ausführen.

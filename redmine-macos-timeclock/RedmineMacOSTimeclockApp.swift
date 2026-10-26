@@ -1,6 +1,6 @@
 import SwiftUI
 
-@main struct MyApp: App {
+@main struct RedmineMacOSTimeclockApp: App {
     @State private var model = AppModel()
 
     var body: some Scene {
