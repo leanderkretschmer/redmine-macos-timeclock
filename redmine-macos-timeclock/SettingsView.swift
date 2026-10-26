@@ -1,4 +1,5 @@
 import AppKit
+import ServiceManagement
 import SwiftUI
 
 /// Configuration pane: Redmine server, API key and/or login.
@@ -8,6 +9,8 @@ struct SettingsView: View {
     @State private var isTesting = false
     @State private var resultMessage: String?
     @State private var succeeded = false
+    @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
+    @State private var launchAtLoginError: String?
 
     init(model: AppModel) {
         self.model = model
@@ -43,6 +46,17 @@ struct SettingsView: View {
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
+            Toggle("Beim Anmelden starten", isOn: $launchAtLogin)
+                .onChange(of: launchAtLogin) { _, enabled in
+                    setLaunchAtLogin(enabled)
+                }
+            if let launchAtLoginError {
+                Label(launchAtLoginError, systemImage: "xmark.octagon")
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
             if let resultMessage {
                 Label(resultMessage, systemImage: succeeded ? "checkmark.circle" : "xmark.octagon")
                     .font(.caption)
@@ -75,5 +89,22 @@ struct SettingsView: View {
         isTesting = false
         succeeded = error == nil
         resultMessage = error ?? "Verbunden als \(model.userName ?? "?")"
+    }
+
+    /// Registers or removes the app as a login item; reverts the toggle if the system refuses.
+    private func setLaunchAtLogin(_ enabled: Bool) {
+        let service = SMAppService.mainApp
+        guard enabled != (service.status == .enabled) else { return }
+        do {
+            if enabled {
+                try service.register()
+            } else {
+                try service.unregister()
+            }
+            launchAtLoginError = nil
+        } catch {
+            launchAtLoginError = error.localizedDescription
+            launchAtLogin = service.status == .enabled
+        }
     }
 }
